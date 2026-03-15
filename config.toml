@@ -1,0 +1,1018 @@
+version = "0.0.1"
+
+[run]
+# Human-readable name for this simulation run.
+name = "full_feature"
+
+description = "Synthetic DNA + RNA + read simulation with variants, expression, artifacts, and truth outputs"
+
+# Integer random seed used to make the run reproducible.
+random_seed = 123456
+
+# Number of independent simulation repeats to generate.
+replicates = 3
+
+# Number of CPU threads the simulator may use.
+threads = 16
+
+# If true, all stochastic steps should behave reproducibly given the seed.
+deterministic = true
+
+# Optional free-text tag for project / study grouping.
+project = "benchmark_suite"
+
+[simulation]
+# Main simulation targets to enable.
+# Allowed examples:
+# - "dna_reference"      : generate or modify genomic DNA sequences
+# - "rna_transcriptome"  : generate transcripts / isoforms
+# - "dna_reads"          : simulate DNA sequencing reads
+# - "rna_reads"          : simulate RNA-seq reads
+mode = ["dna_reference", "rna_transcriptome", "dna_reads", "rna_reads"]
+
+# Arbitrary organism label for output metadata.
+organism_name = "synthetic_human_like"
+
+# Biological ploidy of the simulated genome.
+# 1 = haploid, 2 = diploid, >2 = polyploid.
+ploidy = 2
+
+# If true, DNA variants should be propagated into derived RNA transcripts.
+propagate_dna_variants_to_rna = true
+
+# If true, transcripts are generated after variants are applied.
+# This is usually what you want for realistic DNA->RNA consistency.
+transcribe_from_mutated_genome = true
+
+[input]
+# Path to an existing genomic reference FASTA.
+reference_fasta = "input/reference.fa"
+
+# Path to a gene annotation file in GTF format.
+annotation_gtf = "input/annotation.gtf"
+
+# Optional transcript FASTA if transcripts are provided directly.
+transcript_fasta = "input/transcripts.fa"
+
+# Optional phylogenetic tree in Newick format for evolution-based simulation.
+phylogeny_newick = ""
+
+# Optional BED file containing mutation hotspot regions.
+variant_hotspots_bed = ""
+
+# Optional BED file restricting simulation to target regions.
+target_regions_bed = ""
+
+# Optional known-site VCF to reuse or spike in predefined variants.
+known_sites_vcf = ""
+
+# If true, use the provided genomic reference FASTA.
+use_existing_reference = true
+
+# If true, use the provided gene annotation.
+use_existing_annotation = true
+
+# If true, create new de novo sequences instead of relying only on input FASTA.
+generate_denovo_sequences = false
+
+# If true, mutate the existing reference instead of leaving it unchanged.
+mutate_existing_reference = true
+
+# If true, only simulate regions listed in target_regions_bed.
+restrict_to_target_regions = false
+
+[sequence]
+# Alphabet of the simulated primary sequences.
+# Typical values: "DNA" or "RNA".
+alphabet = "DNA"
+
+# If true, ambiguous IUPAC bases such as N, R, Y may appear.
+ambiguous_bases_allowed = false
+
+# Number of top-level sequences to generate if not fully inferred from a reference.
+# For genomes, this may correspond to chromosomes or contigs.
+number_of_sequences = 24
+
+# Prefix used to construct sequence names like chr1, chr2, ...
+name_prefix = "chr"
+
+# Sequence length model.
+# Allowed examples:
+# - "from_reference" : take lengths from input FASTA
+# - "fixed"          : all sequences have the same length
+# - "uniform"        : sample from a uniform range
+# - "lognormal"      : sample from a log-normal distribution
+# - "empirical"      : use an empirical distribution from data
+length_model = "from_reference"
+
+# Length used when length_model = "fixed".
+fixed_length = 1000000
+
+# Minimum allowed sequence length in bases.
+min_length = 10000
+
+# Maximum allowed sequence length in bases.
+max_length = 250000000
+
+[sequence.base_composition]
+# Target fraction of G and C bases combined.
+gc_content = 0.41
+
+# AT skew = (A - T) / (A + T).
+# Positive values enrich A over T.
+at_skew = 0.0
+
+# GC skew = (G - C) / (G + C).
+# Positive values enrich G over C.
+gc_skew = 0.0
+
+# If true, the global sequence should obey the requested base frequencies closely.
+enforce_global_base_frequencies = true
+
+[sequence.base_frequencies]
+# Per-base marginal probabilities.
+# These should sum to 1.0 for DNA.
+A = 0.295
+C = 0.205
+G = 0.205
+T = 0.295
+
+[sequence.motifs]
+# If true, enriched motifs may be inserted or overrepresented.
+enable_motif_enrichment = true
+
+# If true, repeat elements are explicitly simulated.
+enable_repeat_simulation = true
+
+# Fraction of sequence occupied by repetitive elements.
+repeat_fraction = 0.42
+
+# Fraction of sequence that is low complexity, e.g. simple runs.
+low_complexity_fraction = 0.03
+
+# Expected rate of homopolymer formation.
+homopolymer_rate = 0.01
+
+# Maximum allowed homopolymer run length.
+max_homopolymer_length = 12
+
+[[sequence.motifs.enriched]]
+# Name of an enriched motif model.
+name = "CpG_island"
+
+# Literal motif pattern or simplified motif descriptor.
+pattern = "CG"
+
+# Enrichment relative to background expectation.
+fold_enrichment = 2.0
+
+# Region type where enrichment should apply.
+target_regions = "promoter_like"
+
+[[sequence.motifs.enriched]]
+name = "polyA_signal"
+pattern = "AATAAA"
+fold_enrichment = 1.5
+target_regions = "transcript_3prime"
+
+[genome]
+# If true, genome-specific architectural features are modeled.
+enable_genome_structure = true
+
+# Number of chromosomes / major genomic sequences.
+number_of_chromosomes = 24
+
+# If true, autosomes are included.
+include_autosomes = true
+
+# If true, sex chromosomes are included.
+include_sex_chromosomes = true
+
+# If true, mitochondrial DNA is included.
+include_mt = true
+
+# Model for centromeres.
+# "simple" = generic placeholder centromeres
+# "none"   = no centromeres
+# "empirical" = mimic empirical centromere organization
+centromere_model = "simple"
+
+# Canonical telomeric repeat sequence.
+telomere_repeat = "TTAGGG"
+
+# Mean telomere length in bases.
+telomere_length_mean = 10000
+
+# If true, repeats are soft/hard masked in outputs.
+masked_repeats = false
+
+# Density of CpG-island-like regions per megabase.
+cpg_island_density = 12.0
+
+# Approximate gene density per megabase.
+gene_density_per_mb = 10.0
+
+[genome.contigs]
+# Minimum assembly gap size in bases.
+min_gap_size = 100
+
+# Maximum assembly gap size in bases.
+max_gap_size = 100000
+
+# Fraction of sequence replaced by N gaps.
+n_fraction = 0.001
+
+[genome.regions]
+# Fraction of genome under strong conservation.
+conserved_fraction = 0.08
+
+# Fraction of genome considered neutral background.
+neutral_fraction = 0.80
+
+# Fraction of genome under selection / constrained functional usage.
+selected_fraction = 0.12
+
+[transcriptome]
+# If true, transcriptome simulation is enabled.
+enable_transcriptome = true
+
+# If true, transcript structures are derived from input annotation.
+derive_from_annotation = true
+
+# Number of genes if generating a transcriptome de novo.
+number_of_genes = 20000
+
+# Model for transcripts per gene.
+# Examples: "fixed", "poisson", "empirical"
+transcripts_per_gene_model = "empirical"
+
+# Mean number of transcripts per gene if sampling parametrically.
+mean_transcripts_per_gene = 2.5
+
+# If true, each gene is assigned a transcription strand.
+strand_specific_genes = true
+
+# If true, genes may overlap in genomic coordinates.
+allow_overlapping_genes = false
+
+[transcriptome.gene_model]
+# Model for exon counts per transcript.
+exon_count_model = "empirical"
+
+# Mean number of exons per transcript.
+mean_exons_per_transcript = 8.0
+
+# Minimum number of exons allowed.
+min_exons_per_transcript = 1
+
+# Maximum number of exons allowed.
+max_exons_per_transcript = 50
+
+# Distribution used for exon lengths.
+exon_length_model = "lognormal"
+
+# Mean exon length in bases.
+mean_exon_length = 180
+
+# Minimum exon length in bases.
+min_exon_length = 20
+
+# Maximum exon length in bases.
+max_exon_length = 2000
+
+# Distribution used for intron lengths.
+intron_length_model = "lognormal"
+
+# Mean intron length in bases.
+mean_intron_length = 3500
+
+# Minimum intron length in bases.
+min_intron_length = 30
+
+# Maximum intron length in bases.
+max_intron_length = 1000000
+
+# Mean 5' UTR length in bases.
+utr5_length_mean = 200
+
+# Mean 3' UTR length in bases.
+utr3_length_mean = 800
+
+# Mean poly(A) tail length in bases for mature transcripts.
+polyA_tail_length_mean = 80
+
+# Standard deviation of poly(A) tail length.
+polyA_tail_length_sd = 20
+
+[transcriptome.splicing]
+# If true, alternative splicing events are simulated.
+enable_alternative_splicing = true
+
+# Fraction of genes experiencing at least one alternative splicing event.
+event_rate = 0.35
+
+# Maximum number of isoforms allowed per gene.
+max_isoforms_per_gene = 12
+
+[transcriptome.splicing.event_fractions]
+# Fractions of alternative splicing event types.
+# These should usually sum to 1.0.
+exon_skipping = 0.35
+intron_retention = 0.15
+alt_5prime = 0.15
+alt_3prime = 0.15
+mutually_exclusive_exons = 0.08
+alternative_first_exon = 0.06
+alternative_last_exon = 0.06
+
+[transcriptome.rna_processing]
+# If true, RNA editing events can be added after transcription.
+enable_rna_editing = false
+
+# Per-base probability of RNA editing.
+rna_editing_rate = 0.0001
+
+# If true, fusion transcripts may be generated.
+enable_fusion_transcripts = false
+
+# Fraction of transcripts or genes participating in fusions.
+fusion_rate = 0.00001
+
+# Fraction of pre-mRNA / unspliced RNA retained in the library.
+premrna_fraction = 0.05
+
+# Fraction of reads expected from intronic sequence.
+intronic_fraction = 0.10
+
+# Fraction of reads expected from intergenic sequence.
+intergenic_fraction = 0.02
+
+# RNA degradation model.
+# "none", "uniform", "3prime_bias"
+degradation_model = "3prime_bias"
+
+# Strength of degradation bias; larger means stronger bias.
+degradation_strength = 0.3
+
+[variation]
+# If true, biological variation relative to the baseline reference is introduced.
+enable_variation = true
+
+# If true, simulate inherited / germline variants.
+apply_germline_variants = true
+
+# If true, simulate acquired / somatic variants.
+apply_somatic_variants = false
+
+# Overall heterozygosity rate for diploid/polyploid genomes.
+heterozygosity_rate = 0.001
+
+# If true, phase variants onto haplotypes.
+phased = true
+
+[variation.placement]
+# Model governing where variants are placed.
+# "uniform"          = equal chance everywhere
+# "hotspot"          = enriched in listed hotspots
+# "regional"         = weighted by genomic region types
+# "context_weighted" = weighted by local sequence context
+model = "context_weighted"
+
+# BED file of mutational hotspots.
+hotspot_bed = ""
+
+# Relative mutation weight in exons.
+exonic_weight = 2.0
+
+# Relative mutation weight in introns.
+intronic_weight = 1.0
+
+# Relative mutation weight in intergenic regions.
+intergenic_weight = 0.5
+
+# Relative mutation enrichment at CpG sites / islands.
+cpg_weight = 3.0
+
+[variation.zygosity]
+# Fraction of called variants that are heterozygous.
+heterozygous_fraction = 0.85
+
+# Fraction of called variants that are homozygous.
+homozygous_fraction = 0.15
+
+[variation.snv]
+# SNV = single-nucleotide variant.
+# Per-base probability of SNV introduction.
+rate = 0.001
+
+# Transition / transversion ratio.
+# Transitions: A<->G and C<->T
+# Transversions: purine<->pyrimidine substitutions
+transition_transversion_ratio = 2.1
+
+# If true, SNV probabilities depend on neighboring bases.
+context_dependent = true
+
+[variation.snv.context_model]
+# If true, use a trinucleotide-context mutation model.
+trinucleotide = true
+
+# Extra multiplier for CpG deamination-like events.
+cpg_deamination_boost = 4.0
+
+# Optional named signature set, e.g. a somatic mutation signature profile.
+signature_profile = ""
+
+[variation.indel]
+# Indel = insertion or deletion.
+# Per-base probability of an indel event.
+rate = 0.0001
+
+# Fraction of indels that are insertions.
+insertion_fraction = 0.5
+
+# Fraction of indels that are deletions.
+deletion_fraction = 0.5
+
+# Distribution for indel lengths.
+# "fixed", "geometric", "empirical"
+length_model = "geometric"
+
+# Mean indel length in bases.
+mean_length = 3
+
+# Maximum indel length in bases.
+max_length = 50
+
+[variation.indel.context]
+# Enrichment of indels in homopolymer runs.
+homopolymer_enrichment = 2.0
+
+# Enrichment of indels in microsatellites / STRs.
+microsatellite_enrichment = 3.0
+
+# Enrichment of indels in repetitive sequence.
+repeat_enrichment = 2.5
+
+[variation.structural]
+# If true, structural variants are simulated.
+enable = true
+
+# Event rate for structural variants.
+rate = 0.000001
+
+# Relative fractions of SV classes.
+deletion_fraction = 0.30
+insertion_fraction = 0.15
+duplication_fraction = 0.20
+inversion_fraction = 0.20
+translocation_fraction = 0.10
+cnv_fraction = 0.05
+
+# Minimum SV size in bases.
+min_size = 50
+
+# Maximum SV size in bases.
+max_size = 1000000
+
+[variation.structural.breakpoints]
+# Model for breakpoint placement.
+# "random", "hotspot", "repeat_aware"
+model = "repeat_aware"
+
+# Mean breakpoint microhomology length in bases.
+microhomology_mean = 3
+
+# Enrichment of SV breakpoints inside repeats.
+repeat_breakpoint_enrichment = 2.0
+
+[variation.copy_number]
+# If true, copy-number alterations are simulated.
+enable_aneuploidy = false
+
+# Probability of chromosome-level gains.
+chromosome_gain_rate = 0.0
+
+# Probability of chromosome-level losses.
+chromosome_loss_rate = 0.0
+
+# Rate of focal CNVs, i.e. local copy-number changes.
+focal_cnv_rate = 0.00001
+
+[variation.somatic]
+# If true, tumor / mosaic style somatic variation is enabled.
+enable = false
+
+# Number of subclones to simulate.
+subclone_count = 0
+
+# Fraction of sample molecules originating from tumor cells.
+tumor_purity = 1.0
+
+# Mean variant allele fraction for somatic mutations.
+mean_variant_allele_fraction = 0.5
+
+# Dispersion of somatic VAF around the mean.
+vaf_dispersion = 0.1
+
+[variation.functional_effects]
+# If true, annotate or constrain variants by transcript/protein consequence.
+enable = true
+
+# If true, coding frame awareness is used when classifying coding indels.
+respect_coding_frame = true
+
+# Rate at which splice donor/acceptor sites are specifically mutated.
+splice_site_mutation_rate = 0.00001
+
+# Fraction of coding SNVs resulting in nonsense mutations.
+nonsense_fraction = 0.02
+
+# Fraction of coding indels resulting in frameshifts.
+frameshift_fraction = 0.01
+
+# If true, premature termination codons may trigger nonsense-mediated decay.
+trigger_nmd_for_premature_stop = true
+
+[evolution]
+# If true, simulate sequence evolution from an ancestor or along a tree.
+enable_evolution = false
+
+# Nucleotide substitution model.
+# Examples: "JC69", "K80", "HKY85", "GTR"
+substitution_model = "GTR"
+
+# Simplified indel model name.
+indel_model = "simple"
+
+# Multiplier applied to branch lengths in the phylogeny.
+branch_length_scale = 0.01
+
+# If true, rates vary across sites.
+site_rate_heterogeneity = true
+
+# Shape parameter for gamma-distributed site-rate heterogeneity.
+gamma_shape = 0.5
+
+# Fraction of invariant sites.
+proportion_invariant = 0.1
+
+# Number of descendant sequences to simulate if not determined by tree input.
+simulate_descendants = 0
+
+[expression]
+# If true, transcript/gene abundance is simulated.
+enable_expression = true
+
+# Units used internally for abundance representation.
+# Common values: "TPM", "counts", "molecules"
+unit = "TPM"
+
+# Model for total library size variation across samples.
+library_size_model = "lognormal"
+
+# Mean total library size.
+mean_library_size = 30000000
+
+# Standard deviation of library size.
+library_size_sd = 5000000
+
+# Baseline abundance model for genes/transcripts.
+# Examples: "uniform", "dirichlet", "lognormal", "empirical"
+abundance_model = "lognormal"
+
+# Model for isoform proportion allocation within a gene.
+isoform_usage_model = "dirichlet"
+
+# Biological coefficient of variation across biological replicates.
+biological_cv = 0.2
+
+# Technical coefficient of variation from measurement/library prep noise.
+technical_cv = 0.05
+
+[expression.baseline]
+# Fraction of genes assigned housekeeping-like stable expression.
+housekeeping_fraction = 0.10
+
+# Fraction of genes in a low-expression regime.
+low_expression_fraction = 0.50
+
+# Fraction of genes in a medium-expression regime.
+medium_expression_fraction = 0.30
+
+# Fraction of genes in a high-expression regime.
+high_expression_fraction = 0.10
+
+[expression.differential_expression]
+# If true, differential gene expression between conditions is simulated.
+enable = true
+
+# Fraction of genes that are differentially expressed.
+fraction_of_genes = 0.10
+
+# Fraction of DE genes that are upregulated.
+up_fraction = 0.5
+
+# Fraction of DE genes that are downregulated.
+down_fraction = 0.5
+
+# Distribution used for log2 fold changes.
+log2fc_model = "normal"
+
+# Mean absolute log2 fold change.
+mean_abs_log2fc = 1.5
+
+# Standard deviation of absolute log2 fold change.
+sd_abs_log2fc = 0.5
+
+[expression.differential_transcript_usage]
+# If true, isoform proportion shifts are simulated between conditions.
+enable = true
+
+# Fraction of genes showing DTU.
+fraction_of_genes = 0.03
+
+# Mean magnitude of isoform usage shift.
+mean_isoform_shift = 0.2
+
+[expression.allele_specific]
+# If true, allele-specific expression is simulated.
+enable = false
+
+# Fraction of genes affected by allele-specific imbalance.
+fraction_of_genes = 0.02
+
+# Mean fraction assigned to the major allele.
+mean_major_allele_fraction = 0.65
+
+[samples]
+# List of biological conditions / groups in the experiment.
+conditions = ["control", "treated"]
+
+# Number of replicates per condition if explicit sample tables are not used.
+replicates_per_condition = 3
+
+# If true, paired sample design is assumed.
+paired_design = false
+
+# Number of technical / experimental batches.
+batch_count = 2
+
+# Standard deviation of batch effect strength.
+batch_effect_sd = 0.15
+
+[[samples.sample]]
+# Unique sample identifier.
+sample_id = "control_1"
+
+# Condition name for this sample.
+condition = "control"
+
+# Batch label for this sample.
+batch = "batch_1"
+
+# Sex / karyotype tag if relevant to downstream modeling.
+sex = "XX"
+
+[[samples.sample]]
+sample_id = "control_2"
+condition = "control"
+batch = "batch_1"
+sex = "XY"
+
+[[samples.sample]]
+sample_id = "control_3"
+condition = "control"
+batch = "batch_2"
+sex = "XX"
+
+[[samples.sample]]
+sample_id = "treated_1"
+condition = "treated"
+batch = "batch_1"
+sex = "XY"
+
+[[samples.sample]]
+sample_id = "treated_2"
+condition = "treated"
+batch = "batch_2"
+sex = "XX"
+
+[[samples.sample]]
+sample_id = "treated_3"
+condition = "treated"
+batch = "batch_2"
+sex = "XY"
+
+[sequencing]
+# If true, sequencing read generation is enabled.
+enable_read_simulation = true
+
+# If true, simulate DNA sequencing reads.
+simulate_dna_reads = true
+
+# If true, simulate RNA sequencing reads.
+simulate_rna_reads = true
+
+# Sequencing platform family.
+# "illumina", "ont", "pacbio_hifi", "generic_short", "generic_long"
+platform = "illumina"
+
+# Platform-specific preset / profile.
+profile = "novaseq6000"
+
+# Read layout.
+# "single_end" or "paired_end"
+output_layout = "paired_end"
+
+# Length of read 1 in bases.
+read_length = 150
+
+# Length of read 2 in bases.
+read2_length = 150
+
+[sequencing.fragmentation]
+# Distribution used for fragment lengths before sequencing.
+fragment_length_model = "normal"
+
+# Mean fragment length in bases.
+fragment_mean = 350
+
+# Standard deviation of fragment length in bases.
+fragment_sd = 50
+
+# Minimum allowed fragment length.
+min_fragment_length = 100
+
+# Maximum allowed fragment length.
+max_fragment_length = 1000
+
+[sequencing.depth]
+# Mean DNA sequencing depth in X coverage.
+dna_mean_coverage = 30.0
+
+# Mean total RNA read count per sample.
+rna_mean_read_count = 50000000
+
+# Coverage model across loci/transcripts.
+# "poisson", "nbinom", "empirical"
+coverage_model = "nbinom"
+
+# Dispersion parameter for overdispersed coverage.
+coverage_dispersion = 0.2
+
+# If true, different regions may receive different expected coverage.
+region_specific_coverage = false
+
+[sequencing.bias]
+# If true, coverage depends on GC content.
+enable_gc_bias = true
+
+# Strength of GC-related bias.
+gc_bias_strength = 0.25
+
+# If true, positional bias is applied along molecules/transcripts.
+enable_positional_bias = true
+
+# Bias favoring coverage near the 5' end.
+five_prime_bias = 0.1
+
+# Bias favoring coverage near the 3' end.
+three_prime_bias = 0.3
+
+# If true, sequence context may influence coverage.
+enable_sequence_context_bias = true
+
+# If true, PCR duplicates are modeled.
+enable_pcr_duplication = true
+
+# Expected PCR duplicate fraction.
+pcr_duplicate_rate = 0.08
+
+# If true, residual adapter contamination is simulated.
+enable_adapter_contamination = true
+
+# Fraction of reads affected by adapter contamination.
+adapter_contamination_rate = 0.005
+
+[sequencing.error_model]
+# Base substitution error rate introduced by the sequencer.
+substitution_rate = 0.001
+
+# Insertion error rate introduced by the sequencer.
+insertion_rate = 0.0001
+
+# Deletion error rate introduced by the sequencer.
+deletion_rate = 0.0001
+
+# If true, error rates vary along the read.
+position_dependent = true
+
+# If true, local sequence context influences error rates.
+context_dependent = true
+
+# Quality-score model.
+# "flat" or "empirical"
+quality_profile = "empirical"
+
+# Mean PHRED quality score.
+mean_phred = 32
+
+# Standard deviation of PHRED quality scores.
+phred_sd = 5
+
+# Probability of an ambiguous N base in reads.
+n_base_rate = 0.00001
+
+[sequencing.paired_end]
+# Read-pair orientation.
+# Common Illumina setting: "FR"
+orientation = "FR"
+
+# If true, special rescue logic may be applied to mates in simulation.
+mate_rescue = false
+
+[sequencing.long_reads]
+# If true, chimera formation in long reads is simulated.
+enable_chimeras = false
+
+# Fraction of long reads that are chimeric.
+chimera_rate = 0.001
+
+# Long-read length model.
+length_model = "empirical"
+
+# Mean long-read length in bases.
+mean_read_length = 10000
+
+# Standard deviation of long-read length.
+read_length_sd = 5000
+
+# Maximum long-read length.
+max_read_length = 100000
+
+# Multiplier increasing errors in homopolymer contexts.
+homopolymer_error_boost = 1.5
+
+[sequencing.umi]
+# If true, unique molecular identifiers are attached to reads.
+enable = false
+
+# UMI length in bases.
+length = 12
+
+# Position where the UMI is attached.
+position = "read1_start"
+
+[targeted]
+# If true, targeted sequencing rather than whole-genome/transcriptome mode is used.
+enable = false
+
+# Targeted assay mode.
+# "amplicon" or "capture"
+mode = "amplicon"
+
+# Fraction of reads on target.
+on_target_rate = 0.85
+
+# Fraction of reads off target.
+off_target_rate = 0.15
+
+# Uniformity of coverage across targets.
+uniformity = 0.75
+
+[artifacts]
+# If true, non-biological artifacts are added.
+enable = true
+
+# Fraction of molecules originating from another sample.
+cross_sample_contamination_rate = 0.0
+
+# If true, adapter dimers may be produced.
+adapter_dimers = false
+
+# Strand bias artifact strength.
+strand_bias = 0.0
+
+# Reference-allele bias strength during read generation.
+reference_bias = 0.0
+
+# Fraction of reads originating from environmental or foreign background.
+background_contamination_rate = 0.0
+
+[truth]
+# If true, write the final truth reference FASTA.
+emit_truth_reference = true
+
+# If true, write ground-truth transcript FASTA.
+emit_truth_transcripts = true
+
+# If true, write truth gene model annotation.
+emit_truth_gene_model = true
+
+# If true, write truth VCF of simulated variants.
+emit_truth_vcf = true
+
+# If true, write truth BED tracks for regions/events.
+emit_truth_bed = true
+
+# If true, write gene/transcript expression truth tables.
+emit_truth_expression = true
+
+# If true, write true isoform usage proportions.
+emit_truth_isoform_usage = true
+
+# If true, annotate each read with its true source molecule/origin.
+emit_truth_read_origin = true
+
+# If true, write a table of simulated fusion events.
+emit_truth_fusion_table = true
+
+# If true, emit haplotype-resolved truth outputs where possible.
+emit_phased_truth = true
+
+# If true, emit variant consequence annotations.
+emit_functional_effects = true
+
+[output]
+# Output directory for this run.
+directory = "results/run_001"
+
+# Common prefix for generated files.
+prefix = "sim"
+
+# If true, existing outputs may be overwritten.
+overwrite = false
+
+# If true, compress large text outputs such as FASTQ/VCF/TSV.
+compress = true
+
+[output.formats]
+# Whether to write FASTA files.
+fasta = true
+
+# Whether to write FASTQ files.
+fastq = true
+
+# Whether to write GTF annotation files.
+gtf = true
+
+# Whether to write GFF3 annotation files.
+gff3 = false
+
+# Whether to write VCF files.
+vcf = true
+
+# Whether to write BED files.
+bed = true
+
+# Whether to write tabular TSV outputs.
+tsv = true
+
+# Whether to write a JSON run manifest.
+json_manifest = true
+
+[output.naming]
+# If true, place each sample into its own output subdirectory.
+per_sample_subdirs = true
+
+# If true, condition name is embedded in filenames.
+include_condition_in_filename = true
+
+# If true, replicate/sample suffix is embedded in filenames.
+include_replicate_in_filename = true
+
+[qc]
+# If true, create a QC summary.
+emit_summary = true
+
+# If true, produce plots / visual summaries.
+emit_plots = true
+
+# If true, report k-mer spectra.
+kmer_spectra = true
+
+# If true, report GC-content distribution.
+gc_distribution = true
+
+# If true, report coverage histograms.
+coverage_histogram = true
+
+# If true, report fragment-size distribution.
+fragment_size_histogram = true
+
+# If true, report sequencing error profiles.
+error_profiles = true
+
+[validation]
+# If true, configuration validation is strict.
+strict = true
+
+# If true, abort if required input files are missing.
+fail_on_missing_input = true
+
+# If true, abort on unknown keys not defined by the schema.
+fail_on_unknown_keys = true
+
+# If true, warn about sections that were present but ignored.
+warn_on_unused_sections = true
