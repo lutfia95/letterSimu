@@ -8,6 +8,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(lettersimu_config
     src/ConfigReader.cpp
+    src/DnaReference.cpp
+    src/RnaTranscriptome.cpp
+    src/DnaReads.cpp
+    src/RnaReads.cpp
 )
 
 target_include_directories(lettersimu_config
