@@ -1,9 +1,9 @@
 #include "ConfigReader.hpp"
+#include "Logger.hpp"
 
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
@@ -686,9 +686,9 @@ ConfigReader::Summary ConfigReader::buildSummary() const {
 }
 
 void ConfigReader::printSummary() const {
-    std::cout << "Config summary\n";
-    std::cout << "--------------\n";
-    std::cout << "Loaded keys: " << values_.size() << '\n';
+    Logger::info("Config summary");
+    Logger::info("--------------");
+    Logger::info("Loaded keys: " + std::to_string(values_.size()));
 
     std::vector<std::string> keys;
     keys.reserve(values_.size());
@@ -699,6 +699,6 @@ void ConfigReader::printSummary() const {
     std::sort(keys.begin(), keys.end());
 
     for (const std::string& key : keys) {
-        std::cout << key << " = " << formatValue(values_.at(key)) << '\n';
+        Logger::info(key + " = " + formatValue(values_.at(key)));
     }
 }
