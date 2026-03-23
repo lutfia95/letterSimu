@@ -22,7 +22,9 @@ const char* DnaReference::name() const {
     return "dna_reference";
 }
 
-std::vector<TargetParser::TargetParam> DnaReference::parseTargetParams(const ConfigReader::Config& config) const {
+std::vector<TargetParser::TargetParam> DnaReference::parseTargetParams(
+    const ConfigReader::Config& config
+) const {
     return {
         makeStringParam("reference_fasta", config.input.referenceFasta),
         makeStringParam("target_regions_bed", config.input.targetRegionsBed),

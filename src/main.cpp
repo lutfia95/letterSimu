@@ -32,7 +32,10 @@ std::vector<std::unique_ptr<TargetParser>> makeTargetParsers() {
     return parsers;
 }
 
-const TargetParser* findTargetParser(const std::vector<std::unique_ptr<TargetParser>>& parsers, const std::string& targetName) {
+const TargetParser* findTargetParser(
+    const std::vector<std::unique_ptr<TargetParser>>& parsers,
+    const std::string& targetName
+) {
     for (const auto& parser : parsers) {
         if (parser->name() == targetName) {
             return parser.get();

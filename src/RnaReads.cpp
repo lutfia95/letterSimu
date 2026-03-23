@@ -22,7 +22,9 @@ const char* RnaReads::name() const {
     return "rna_reads";
 }
 
-std::vector<TargetParser::TargetParam> RnaReads::parseTargetParams(const ConfigReader::Config& config) const {
+std::vector<TargetParser::TargetParam> RnaReads::parseTargetParams(
+    const ConfigReader::Config& config
+) const {
     return {
         makeBoolParam("simulate_rna_reads", config.sequencing.simulateRnaReads),
         makeStringParam("platform", config.sequencing.platform),

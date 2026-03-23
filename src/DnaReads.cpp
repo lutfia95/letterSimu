@@ -22,7 +22,9 @@ const char* DnaReads::name() const {
     return "dna_reads";
 }
 
-std::vector<TargetParser::TargetParam> DnaReads::parseTargetParams(const ConfigReader::Config& config) const {
+std::vector<TargetParser::TargetParam> DnaReads::parseTargetParams(
+    const ConfigReader::Config& config
+) const {
     return {
         makeBoolParam("simulate_dna_reads", config.sequencing.simulateDnaReads),
         makeStringParam("platform", config.sequencing.platform),

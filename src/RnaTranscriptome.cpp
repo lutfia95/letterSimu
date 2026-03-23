@@ -22,7 +22,9 @@ const char* RnaTranscriptome::name() const {
     return "rna_transcriptome";
 }
 
-std::vector<TargetParser::TargetParam> RnaTranscriptome::parseTargetParams(const ConfigReader::Config& config) const {
+std::vector<TargetParser::TargetParam> RnaTranscriptome::parseTargetParams(
+    const ConfigReader::Config& config
+) const {
     return {
         makeStringParam("annotation_gtf", config.input.annotationGtf),
         makeStringParam("transcript_fasta", config.input.transcriptFasta),
